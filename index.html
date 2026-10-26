@@ -7,29 +7,52 @@
   <title>Мир ярких персонажей | 3D-галерея</title>
   <meta name="description" content="Интерактивная 3D-галерея персонажей">
   <link rel="stylesheet" href="./styles.css">
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js"></script>
+
+  <script type="module"
+    src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.4.0/model-viewer.min.js">
+  </script>
 </head>
+
 <body>
   <div class="page">
+
     <header class="header">
-      <div class="logo"><span class="logo-mark">✳</span> COLORVERSE</div>
+      <div class="logo">
+        <span class="logo-mark">✳</span>
+        Цветная вселенная
+      </div>
       <span class="header-tag">Интерактивная 3D-галерея</span>
     </header>
 
     <main>
       <section class="intro">
-        <div class="eyebrow">DIGITAL ART · 3D EXPERIENCE</div>
-        <h1>Мир ярких<br><em>персонажей.</em></h1>
-        <p>Откройте для себя трёхмерную сцену, где встречаются характер, цвет и воображение. Вращайте модель, изучайте детали и попробуйте дополненную реальность.</p>
+        <div class="eyebrow">
+          ЦИФРОВОЕ ИСКУССТВО · 3D-ОПЫТ
+        </div>
+
+        <h1>
+          Мир ярких<br>
+          <em>персонажей.</em>
+        </h1>
+
+        <p>
+          Откройте для себя трёхмерную сцену, где встречаются
+          характер, цвет и воображение. Вращайте модель,
+          изучайте детали, запускайте анимацию и экспериментируйте
+          с визуальными эффектами.
+        </p>
       </section>
 
       <section class="viewer-card">
         <div class="viewer-top">
-          <span><span class="live-dot"></span> ИНТЕРАКТИВНАЯ СЦЕНА</span>
+          <span>
+            <span class="live-dot"></span>
+            ИНТЕРАКТИВНАЯ СЦЕНА
+          </span>
           <span>01 / 01</span>
         </div>
 
-        <div class="viewer-wrap">
+        <div class="viewer-wrap" id="viewerWrap">
           <model-viewer
             id="viewer"
             src="092dab5b45f84cf9b871a2ba0b894c5b.glb"
@@ -38,6 +61,8 @@
             camera-controls
             auto-rotate
             rotation-per-second="15deg"
+            animation-name="Animation"
+            autoplay
             tone-mapping="neutral"
             poster="poster.webp"
             shadow-intensity="1.22"
@@ -45,8 +70,7 @@
             camera-orbit="0deg 75deg 10.16m"
             field-of-view="30deg"
             exposure="1.09"
-            interaction-prompt="auto"
-            alt="Трёхмерная сцена с двумя яркими персонажами">
+            alt="Трёхмерная анимированная сцена с двумя персонажами">
 
             <div class="progress-bar hide" slot="progress-bar">
               <div class="update-bar"></div>
@@ -60,41 +84,90 @@
               <img src="ar_hand_prompt.png" alt="">
             </div>
           </model-viewer>
-          <div class="viewer-label">3D CHARACTER COLLECTION <span>✦</span></div>
+
+          <div class="viewer-label">
+            КОЛЛЕКЦИЯ 3D-ПЕРСОНАЖЕЙ ✦
+          </div>
+
+          <div class="effect-status" id="effectStatus" hidden>
+            ЭФФЕКТ ВКЛЮЧЁН
+          </div>
         </div>
 
         <div class="controls">
           <div class="control-group">
             <button id="rotateBtn">⏸ Остановить вращение</button>
+            <button id="animationBtn">⏸ Остановить анимацию</button>
             <button id="zoomIn">＋ Приблизить</button>
             <button id="zoomOut">－ Отдалить</button>
             <button id="resetBtn">↺ Сбросить вид</button>
           </div>
-          <span class="control-hint">Перетаскивайте модель мышью</span>
+          <span class="control-hint">
+            Перетаскивайте модель мышью
+          </span>
+        </div>
+
+        <div class="effects-panel">
+          <div class="effects-heading">
+            <div>
+              <span class="eyebrow">ВИЗУАЛЬНЫЕ ЭФФЕКТЫ</span>
+              <h2>Экспериментируй с изображением</h2>
+            </div>
+            <span class="effects-subtitle">
+              Выберите один из эффектов
+            </span>
+          </div>
+
+          <div class="effect-buttons">
+            <button id="normalEffect" class="effect-btn active">
+              ✦ Обычный вид
+            </button>
+            <button id="pixelEffect" class="effect-btn">
+              ▦ Pixelate
+            </button>
+            <button id="glitchEffect" class="effect-btn">
+              ⚡ Glitch
+            </button>
+          </div>
+
+          <p class="effect-description" id="effectDescription">
+            Исходное изображение без дополнительных эффектов.
+          </p>
         </div>
       </section>
 
       <section class="info-grid">
         <article class="info-card yellow">
-          <span class="card-number">01 / ИССЛЕДУЙ</span>
+          <span class="card-number">01 / АНИМАЦИЯ</span>
           <div class="card-icon">↻</div>
-          <h2>Рассмотри со всех сторон</h2>
-          <p>Вращай трёхмерную сцену, приближай персонажей и изучай каждую деталь.</p>
+          <h2>Персонажи оживают</h2>
+          <p>
+            Запускайте и останавливайте анимацию, вращайте
+            сцену и рассматривайте движения персонажей.
+          </p>
         </article>
+
         <article class="info-card pink">
-          <span class="card-number">02 / ПОПРОБУЙ</span>
-          <div class="card-icon">◈</div>
-          <h2>Дополненная реальность</h2>
-          <p>Открой сайт на совместимом смартфоне и попробуй разместить модель в реальном пространстве.</p>
+          <span class="card-number">02 / ЭФФЕКТЫ</span>
+          <div class="card-icon">✳</div>
+          <h2>Новый взгляд на 3D</h2>
+          <p>
+            Применяйте пикселизацию и цифровые искажения,
+            чтобы изменить восприятие трёхмерной сцены.
+          </p>
         </article>
       </section>
     </main>
 
     <footer>
-      <span>COLORVERSE © 2026</span>
-      <span>Еланская Александра Максимовна · Лабораторная работа № 5</span>
+      <span>ЦВЕТНАЯ ВСЕЛЕННАЯ © 2026</span>
+      <span>
+        Еланская Александра Максимовна ·
+        Лабораторная работа № 6
+      </span>
     </footer>
   </div>
+
   <script src="./script.js"></script>
 </body>
 </html>
