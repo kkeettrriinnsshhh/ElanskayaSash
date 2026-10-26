@@ -266,3 +266,22 @@ footer {
   .info-grid { grid-template-columns: 1fr; }
   footer { flex-direction: column; }
 }
+
+/* Выравнивание заголовка и описания по центру */
+.intro {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.intro h1 {
+  text-align: center;
+}
+
+.intro p {
+  text-align: center;
+  max-width: 650px;
+  margin-left: auto;
+  margin-right: auto;
+}
