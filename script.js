@@ -18,16 +18,18 @@ const effectStatus = document.querySelector('#effectStatus');
 const initialOrbit = '0deg 75deg 10.16m';
 const initialFov = '30deg';
 
-/* Вращение модели */
+let activeEffect = 'normal';
+let pixelTimer = null;
+let pixelCanvas = null;
+let pixelContext = null;
+
 rotateBtn.addEventListener('click', () => {
   viewer.autoRotate = !viewer.autoRotate;
-
   rotateBtn.textContent = viewer.autoRotate
     ? '⏸ Остановить вращение'
     : '▶ Включить вращение';
 });
 
-/* Воспроизведение анимации */
 viewer.addEventListener('load', () => {
   const animations = viewer.availableAnimations || [];
 
@@ -35,10 +37,8 @@ viewer.addEventListener('load', () => {
     viewer.animationName = animations.includes('Animation')
       ? 'Animation'
       : animations[0];
-
     viewer.play();
     animationBtn.disabled = false;
-    animationBtn.textContent = '⏸ Остановить анимацию';
   } else {
     animationBtn.disabled = true;
     animationBtn.textContent = 'Анимация отсутствует';
@@ -55,15 +55,9 @@ animationBtn.addEventListener('click', () => {
   }
 });
 
-/* Масштабирование */
 function changeZoom(factor) {
   const orbit = viewer.getCameraOrbit();
-
-  const distance = Math.max(
-    2,
-    Math.min(30, orbit.radius * factor)
-  );
-
+  const distance = Math.max(2, Math.min(30, orbit.radius * factor));
   viewer.cameraOrbit =
     `${orbit.theta}rad ${orbit.phi}rad ${distance}m`;
 }
@@ -71,61 +65,117 @@ function changeZoom(factor) {
 zoomIn.addEventListener('click', () => changeZoom(0.8));
 zoomOut.addEventListener('click', () => changeZoom(1.25));
 
-/* Сброс камеры */
 resetBtn.addEventListener('click', () => {
   viewer.cameraOrbit = initialOrbit;
   viewer.fieldOfView = initialFov;
   viewer.autoRotate = true;
-
   rotateBtn.textContent = '⏸ Остановить вращение';
-
   viewer.jumpCameraToGoal();
 });
 
-/* Визуальные эффекты */
-const effectButtons = [
-  normalEffect,
-  pixelEffect,
-  glitchEffect
-];
+/* Пикселизация через низкое разрешение */
+function startPixelate() {
+  stopPixelate();
+
+  pixelCanvas = document.createElement('canvas');
+  pixelCanvas.className = 'pixel-overlay';
+  pixelCanvas.setAttribute('aria-hidden', 'true');
+
+  pixelContext = pixelCanvas.getContext('2d', {
+    alpha: false
+  });
+
+  if (!pixelContext) return;
+
+  viewerWrap.appendChild(pixelCanvas);
+
+  function renderPixelFrame() {
+    if (activeEffect !== 'pixel' || !pixelCanvas) return;
+
+    const width = Math.max(1, viewer.clientWidth);
+    const height = Math.max(1, viewer.clientHeight);
+
+    const pixelSize = 12;
+
+    const lowWidth = Math.max(1, Math.floor(width / pixelSize));
+    const lowHeight = Math.max(1, Math.floor(height / pixelSize));
+
+    if (pixelCanvas.width !== lowWidth ||
+        pixelCanvas.height !== lowHeight) {
+      pixelCanvas.width = lowWidth;
+      pixelCanvas.height = lowHeight;
+    }
+
+    try {
+      const image = viewer.toDataURL('image/png');
+      const frame = new Image();
+
+      frame.onload = () => {
+        if (activeEffect !== 'pixel' || !pixelContext) return;
+
+        pixelContext.imageSmoothingEnabled = false;
+        pixelContext.clearRect(0, 0, lowWidth, lowHeight);
+        pixelContext.drawImage(frame, 0, 0, lowWidth, lowHeight);
+      };
+
+      frame.src = image;
+    } catch (error) {
+      console.warn('Pixelate:', error);
+    }
+  }
+
+  renderPixelFrame();
+  pixelTimer = setInterval(renderPixelFrame, 250);
+}
+
+function stopPixelate() {
+  if (pixelTimer !== null) {
+    clearInterval(pixelTimer);
+    pixelTimer = null;
+  }
+
+  if (pixelCanvas) {
+    pixelCanvas.remove();
+    pixelCanvas = null;
+  }
+
+  pixelContext = null;
+}
 
 function setEffect(effect) {
-  viewerWrap.classList.remove(
-    'effect-pixel',
-    'effect-glitch'
-  );
+  stopPixelate();
+  activeEffect = effect;
 
-  effectButtons.forEach(button => {
+  viewerWrap.classList.remove('effect-pixel', 'effect-glitch');
+
+  [normalEffect, pixelEffect, glitchEffect].forEach(button => {
     button.classList.remove('active');
   });
 
   effectStatus.hidden = true;
 
   if (effect === 'pixel') {
-    viewerWrap.classList.add('effect-pixel');
     pixelEffect.classList.add('active');
+    viewerWrap.classList.add('effect-pixel');
 
     effectDescription.textContent =
-      'Pixelate: стилизация изображения с повышенным контрастом и насыщенностью.';
+      'Pixelate: изображение отображается с крупными квадратными пикселями.';
 
     effectStatus.textContent = 'PIXELATE';
     effectStatus.hidden = false;
-  }
 
-  else if (effect === 'glitch') {
-    viewerWrap.classList.add('effect-glitch');
+    startPixelate();
+  } else if (effect === 'glitch') {
     glitchEffect.classList.add('active');
+    viewerWrap.classList.add('effect-glitch');
 
     effectDescription.textContent =
-      'Glitch: цифровые искажения, цветовые смещения и эффект дрожания изображения.';
+      'Glitch: цифровые искажения и цветовые смещения.';
 
     effectStatus.textContent = 'GLITCH';
     effectStatus.hidden = false;
-  }
-
-  else {
+  } else {
     normalEffect.classList.add('active');
-
     effectDescription.textContent =
       'Исходное изображение без дополнительных эффектов.';
   }
