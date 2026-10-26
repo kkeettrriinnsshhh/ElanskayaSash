@@ -434,3 +434,10 @@ footer {
     flex-direction: column;
   }
 }
+
+/* Настоящая пикселизация 3D-сцены */
+.viewer-wrap.effect-pixel model-viewer {
+  filter: none;
+  image-rendering: pixelated;
+  transform: scale(1);
+}
